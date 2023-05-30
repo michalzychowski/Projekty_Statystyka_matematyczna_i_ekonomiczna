@@ -1,0 +1,115 @@
+---
+title: "Clastering"
+author: "Michał Żychowski"
+date: "2023-05-24"
+output: html_document
+---
+
+
+
+```{r,warning=FALSE,message=FALSE}
+library(readxl)
+dane <- read_excel("dane.xlsx")
+head(dane)
+library(lmtest)
+library(cluster)
+library(fpc)
+library(MASS)
+```
+
+```{r}
+Frame1 <- data.frame(dane)
+K <- ncol(Frame1)
+```
+
+```{r}
+Frame2 <- data.frame(scale(Frame1[,2:K]))
+```
+
+```{r}
+X <- data.frame(Frame1[1],Frame2)
+head(X)
+```
+
+```{r}
+dist.X <- dist(X[2:K],method = "euclidian")
+round(dist.X,2)
+```
+
+```{r}
+CW<-hclust(dist.X,method = "ward.D2",members = NULL)
+
+A1<-plot(CW,labels = X[,1],main="Dendogram województw")
+```
+
+```{r}
+#dla 3 klastrów
+clust3<-cutree(CW,k=3)
+#dla 4 klastrów
+clust4<-cutree(CW,k=4)
+```
+
+```{r}
+showc3 <- lapply(1:3,function(which.group)Frame1[1][clust3==which.group,])
+showc3
+```
+
+```{r}
+showc4 <- lapply(1:4,function(which.group)Frame1[1][clust4==which.group,])
+showc4
+```
+
+```{r}
+S3<-cluster.stats(dist.X,clust3)
+S3$cluster.size
+```
+
+```{r}
+S3$average.distance
+```
+
+```{r}
+S3$separation.matrix
+```
+
+```{r}
+S3$average.between
+```
+
+```{r}
+S3$average.within
+```
+
+```{r}
+S4<-cluster.stats(dist.X,clust4)
+S4$cluster.size
+```
+
+```{r}
+S4$average.distance
+```
+
+```{r}
+S4$separation.matrix
+```
+
+```{r}
+S4$average.between
+```
+
+```{r}
+S4$average.within
+```
+
+```{r}
+ifelse(S3$wb.ratio<=S4$wb.ratio,"Klastorwanie pierwsze jest lepsze","Klastorwanie drugie jest lepsze")
+```
+
+```{r}
+ifelse(S3$pearsongamma>=S4$pearsongamma,"Klastorwanie pierwsze jest lepsze","Klastorwanie drugie jest lepsze")
+```
+
+```{r}
+ifelse(S3$dunn2>=S4$dunn2,"Klastorwanie pierwsze jest lepsze","Klastorwanie drugie jest lepsze")
+```
+
