@@ -1,0 +1,127 @@
+---
+title: "Szeregi czasowe"
+author: "Michał Żychowski"
+date: "2023-05-25"
+output: html_document
+---
+
+
+
+
+
+```{r, results='hide',warning=FALSE,message=FALSE}
+library(readxl)
+dane_pierwotne <-read_excel("dane.xlsx",col_types = c("text", "numeric"))
+head(dane_pierwotne)
+library(forecast)
+library(tseries)
+library(fBasics)
+library(timeSeries)
+library(lmtest)
+library(TTR)
+```
+
+
+
+
+```{r}
+dane <- data.frame(dane_pierwotne)
+X <- ts(dane[2], start = c(1991,7),frequency = 12)
+plot.ts(X)
+```
+
+
+
+
+```{r,warning=FALSE, results='hold'}
+stationarity_test <-adf.test(X,alternative = "stationary",k = 2)
+ifelse(stationarity_test$p.value<0.05,"Szereg jest stacjonarny","Szereg jest niestacjonarny")
+
+explosive_test <-adf.test(X,alternative = "explosive",k = 2)
+ifelse(explosive_test$p.value<0.05,"Szereg jest eksplozywny","Szereg jest nieeksplozywny")
+```
+
+
+
+
+```{r,warning=FALSE}
+#testujemy trend
+trend_test <- kpss.test(X,null="Trend",lshort = TRUE)
+ifelse(trend_test$p.value<0.05,"Szereg ma trend","Szereg nie ma trendu")
+```
+
+
+
+
+```{r}
+basic_stats<-basicStats(X,ci=0.95)
+basic_stats
+```
+
+
+
+
+```{r}
+plot(X)
+```
+
+
+
+
+```{r}
+dane_zdekomponowane <- decompose(X,type="additive",filter = NULL)
+```
+
+
+
+
+```{r, echo=FALSE}
+plot(dane_zdekomponowane$seasonal)
+```
+
+
+
+
+```{r, echo=FALSE}
+plot(dane_zdekomponowane$trend)
+```
+
+
+
+```{r, echo=FALSE}
+plot(dane_zdekomponowane$random)
+```
+
+### Podusmowanie wykresów
+
+Mamy widoczną sezowność, trend, oraz wachania losowe
+
+## Tworzenie modelu
+
+Z uwagi na charakter naszego szeregu do stworzenia możemy użyć metody Holta-Wintersa. Z wyżej wyciągniętych wniosków możemy stwierdzić, że należy użyć w tej metodzie parametrów Alfa, Beta i Gamma
+
+```{r}
+X2 <- HoltWinters(X,seasonal = "additive")
+plot(X2)
+```
+
+
+
+```{r}
+XForecast <- forecast(X2,h=12)
+plot(Xforecast)
+```
+
+
+
+```{r}
+acf(na.omit(XForecast$residuals), lag.max=20)
+
+box_test<-Box.test(Xforecast$residuals, lag=20, type="Ljung-Box")
+ifelse(box_test$p.value<0.05,"Występuje istotna autokorelacja w błędch prognozy","Zerowa autokorelacja w błędach prognozy")
+```
+
+## Wnioski
+
+Jak widać powyżej nie występują żadne autokorelacje oraz wszystkie testy wykonane do tej pory testy nie wykazały żadnych nieprawidłowości, wiec można stwierdzić że stworzona prognoza jest całkiem poprawna
+
