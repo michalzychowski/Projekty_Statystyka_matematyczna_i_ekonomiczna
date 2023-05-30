@@ -1,0 +1,103 @@
+# Szeregi czasowe
+# Michał Żychowski
+# 2023-05-25
+  
+  
+  
+  
+# Podstawowa analiza
+# W pierwszej kolejności, zaimportujmy dane oraz niezbędne biblioteki.
+
+library(readxl)
+dane_pierwotne <-read_excel("../data/dane.xlsx",col_types = c("text", "numeric"))
+head(dane_pierwotne)
+library(forecast)
+library(tseries)
+library(fBasics)
+library(timeSeries)
+library(lmtest)
+library(TTR)
+
+
+
+# Następnie przygotujmy dane do analizy i wygenerujmy wykres.
+dane <- data.frame(dane_pierwotne)
+X <- ts(dane[2], start = c(1991,7),frequency = 12)
+plot.ts(X)
+
+
+
+# Następnie sprawdzamy czy nasz szereg jest stacjonarny oraz czy jest eksplozywny
+stationarity_test <-adf.test(X,alternative = "stationary",k = 2)
+ifelse(stationarity_test$p.value<0.05,"Szereg jest stacjonarny","Szereg jest niestacjonarny")
+
+explosive_test <-adf.test(X,alternative = "explosive",k = 2)
+ifelse(explosive_test$p.value<0.05,"Szereg jest eksplozywny","Szereg jest nieeksplozywny")
+
+
+
+# Testujemy Trend
+trend_test <- kpss.test(X,null="Trend",lshort = TRUE)
+ifelse(trend_test$p.value<0.05,"Szereg ma trend","Szereg nie ma trendu")
+
+
+# Ze względu na stacjonarność naszego szeregu, teraz możemy przejść do sprawdzenia podstawowych statystyk dla niego.
+basic_stats<-basicStats(X,ci=0.95)
+basic_stats
+
+
+
+# Dekompozycja szeregu
+# Dla przeprowadzenia dekompozycji szeregu, musimy ustalić, czy jest on addytywny czy multiplikatywny.
+# Możemy to ocenić, analizując wykres naszego szeregu.
+plot(X)
+
+
+# Ze względu na stałą amplitudę wahań naszego szeregu, można stwierdzić, że ma on model addytywny. 
+
+
+
+# Teraz, po ustaleniu modelu naszego szeregu, przystępujemy do jego dekompozycji.
+dane_zdekomponowane <- decompose(X,type="additive",filter = NULL)
+
+
+
+# Po przeprowadzeniu dekompozycji, możemy sporządzić poniższe wykresy.
+# Sezonowość szeregu
+plot(dane_zdekomponowane$seasonal)
+
+# Trend szeregu
+plot(dane_zdekomponowane$trend)
+
+# Odchylenia losowe
+plot(dane_zdekomponowane$random)
+
+# Podusmowanie wykresów
+# Widzimy teraz wykresy sezowności, trendu oraz wahań losowych
+
+
+
+# Tworzenie modelu
+# Z uwagi na charakter naszego szeregu do stworzenia możemy użyć metody Holta-Wintersa.
+# Z wyżej wyciągniętych wniosków możemy stwierdzić, że należy użyć w tej metodzie parametrów Alfa, Beta i Gamma
+X2 <- HoltWinters(X,seasonal = "additive")
+plot(X2)
+
+
+# Przewidywwany trend
+# Po uzyskaniu naszego modelu, możemy teraz spróbować przewidzieć zachowanie tego zjawiska na przestrzeni na przykład 12 miesięcy, jak to przedstawiono poniżej.
+XForecast <- forecast(X2,h=12)
+plot(XForecast)
+
+
+# Testowanie prognozy
+#Po uzyskaniu prognozy, możemy przeprowadzić na niej testy ACF oraz test Ljung-Box w celu sprawdzenia autokorelacji.
+acf(na.omit(XForecast$residuals), lag.max=20)
+
+box_test<-Box.test(XForecast$residuals, lag=20, type="Ljung-Box")
+ifelse(box_test$p.value<0.05,"Występuje istotna autokorelacja w błędch prognozy","Zerowa autokorelacja w błędach prognozy")
+
+
+# Wnioski
+# Jak można zauważyć na powyższym, nie występują żadne autokorelacje, a wszystkie dotychczas przeprowadzone testy nie wykazały żadnych nieprawidłowości. Na podstawie tego można stwierdzić, że stworzona prognoza jest całkowicie poprawna.
+
