@@ -15,7 +15,7 @@ Zacznijmy od zaimportowania naszej bazy danych oraz niezbędnych bibliotek.
 
 ```{r,warning=FALSE,message=FALSE}
 library(readxl)
-dane <- read_excel("dane.xlsx")
+dane <- read_excel("../data/dane.xlsx")
 head(dane)
 library(lmtest)
 library(cluster)
