@@ -6,7 +6,7 @@ Projekty na przedmiot "Statystyka matematyczna i ekonomiczna" na II roku studió
 * Drzewa klasyfikacyjne – budowa i testowanie modeli klasyfikacyjnych dla danych opisowych.
 
 ## Technologie
-Projekt został wykonany przy użyciu:
+Projekty zostały wykonane przy użyciu:
 * R
 * RStudio
 * Biblioteki:
@@ -17,9 +17,9 @@ Projekt został wykonany przy użyciu:
     * cluster, fpc (analiza skupień)
 
 ## Wymagania
-Do uruchomienia projektu potrzebne są:
+Do uruchomienia projektów potrzebne są:
 * Zainstalowane środowisko R (np. R + RStudio)
-* Zainstalowane wymienione biblioteki (install.packages(...))
+* Zainstalowane wyżej wymienione biblioteki (install.packages(...))
 
 ## Instrukcja uruchomieniagit
 1. Zainstaluj wymagane komponenty
