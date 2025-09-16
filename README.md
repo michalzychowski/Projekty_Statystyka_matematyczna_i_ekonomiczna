@@ -1,1 +1,1 @@
-# Projekty_Statystyka_matematyczna_i_ekonomiczna
+# Projekty - Statystyka matematyczna i ekonomiczna

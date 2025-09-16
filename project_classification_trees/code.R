@@ -1,15 +1,6 @@
 # Drzewa klasyfikacyjne
-# Michał Żychowski
-# 2023-05-26"
-
-
-  
-  
-  
 
 # Przygotowanie danych
-# Zaczynajmy od importu naszej bazy danych oraz niezbędnych bibliotek.
-
 library(readxl)
 dane <- read_excel("data/dane.xlsx")
 library(MASS)
@@ -19,17 +10,12 @@ library(rpart.plot)
 library(party)
 library(class)
 
-
-
-# Generujemy ramkę danych a następnie usuwamy braki danych
 dane_pierwotne <- data.frame(dane)
 Dane <- na.omit(data.frame(dane_pierwotne))
 head(Dane)
 
 
-
 # Tworzenie zbioru uczącego oraz testowego
-# Przy tworzeniu naszych zbiorów uczących, losowo wybieramy rekordy z naszej ramki danych i przypisujemy je do odpowiednich zbiorów.
 Indeksy <- sample(1:nrow(dane),nrow(dane)/2,replace = FALSE)
 
 zbior_uczacy = dane[Indeksy, ]
@@ -39,25 +25,18 @@ head(zbior_uczacy)
 head(zbior_testowy)
 
 
-
 # Tworzymy model drzewa
-# Tworzymy go za pomocą funkcji rpart, wykorzystując zbiór uczący. Ponieważ nasze zmienne są jakościowe, wybieramy metodę "class".
 Drzewo <- rpart(zbior_uczacy$`Prawo jazdy`~.,zbior_uczacy,method = "class")
 
-
-# Dla naszego drzewa możemy sprawdzić parametry oraz liczbę gałęzi.
 Drzewo$parms
 Drzewo$numresp
 
-
-# W przypadku gdy wygenerowane drzewo jest bardzo rozległe, możemy spróbować je przyciąć. Choć w naszym przypadku liczba gałęzi jest dość mała, warto sprawdzić, czy przycięcie drzewa nie spowoduje poprawy jego jakości.
 Model.optimal<-which.min(Drzewo$cptable[,4])
 CP.optimal<-Drzewo$cptable[Model.optimal,1]
 Drzewo2<-prune(Drzewo,cp=Model.optimal)
 
 
 # Weryfikacja naszych modeli
-# Teraz, gdy mamy już nasze modele, możemy sprawdzić ich dopasowanie do zbioru uczącego dla naszego pierwotnego drzewa.
 prediction1<-predict(Drzewo,zbior_uczacy,type = "class")
 
 print("Tabela dobroci klasyfikacji")
@@ -67,8 +46,6 @@ print("Obliczanie błędu predykcji")
 error1<-mean(prediction1 != zbior_uczacy$`Prawo jazdy`)
 error1
 
-
-# oraz dla przyciętego drzewa
 prediction2<-predict(Drzewo2,zbior_uczacy,type = "class")
 
 print("Tabela dobroci klasyfikacji")
@@ -77,9 +54,6 @@ table(predykacja=prediction2,prawdziwe=zbior_uczacy$`Prawo jazdy`)
 print("Obliczanie błędu predykcji")
 error2<-mean(prediction2 != zbior_uczacy$`Prawo jazdy`)
 error2
-
-
-# Zauważamy, że nasze przycięte drzewo ma większy błąd predykcji. Niemniej jednak, nie powinniśmy go jeszcze odrzucać, ponieważ istnieje możliwość, że będzie on miało znacznie mniejszy błąd predykcji na zbiorze testowym.
 
 
 # Testowanie na zbiorze testowym
@@ -94,12 +68,6 @@ print("Błąd predykcji drzewa Przyciętego")
 errorT2
 
 
-# Teraz możemy ocenić, który model powinniśmy wybrać. Jednak należy pamiętać, że podział na zbiór uczący i testowy jest losowy, więc przy kolejnym uruchomieniu kodu możemy uzyskać inny wynik.
-
-
 # Rysowanie drzewa
-# Po dokonaniu wyboru, który model jest lepszy, możemy go przedstawić w postaci wykresu, aby lepiej zobrazować jego działanie.
-
-
 rpart.plot(Drzewo,type = 4,extra="auto")
 rpart.plot(Drzewo2,type = 4,extra="auto")
