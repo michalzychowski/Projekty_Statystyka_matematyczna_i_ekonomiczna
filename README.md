@@ -21,7 +21,7 @@ Do uruchomienia projektów potrzebne są:
 * Zainstalowane środowisko R (np. R + RStudio)
 * Zainstalowane wyżej wymienione biblioteki (install.packages(...))
 
-## Instrukcja uruchomieniagit
+## Instrukcja uruchomienia
 1. Zainstaluj wymagane komponenty
 2. Sklonuj repozytorium komendą `git clone https://github.com/michalzychowski/Projekty_Statystyka_matematyczna_i_ekonomiczna.git`
 3. Otwórz wybrany projekt w RStudio
